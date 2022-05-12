@@ -29,7 +29,11 @@
 # This sets the default machine to be qemux86-64 if no other machine is selected:
 MACHINE ??= "qemux86-64"
 
-#
+# Note that the openembedded-core layer defines a few more QEMU targets that
+# are not listed here as they are not tested as robustly as the above, but they
+# are still available for the adventurous; see the full list at:
+# https://git.openembedded.org/openembedded-core/tree/meta/conf/machine
+
 # Where to place downloads
 #
 # During a first build the system will download many different source code tarballs
