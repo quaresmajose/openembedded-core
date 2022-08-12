@@ -1,7 +1,5 @@
 inherit module-base kernel-module-split pkgconfig
 
-DEPENDS += "virtual/kernel"
-
 EXTRA_OEMAKE += "KERNEL_SRC=${STAGING_KERNEL_DIR}"
 
 MODULES_INSTALL_TARGET ?= "modules_install"
