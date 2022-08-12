@@ -83,10 +83,11 @@ python sysroot_strip () {
     pn = d.getVar('PN')
     libdir = d.getVar("libdir")
     base_libdir = d.getVar("base_libdir")
+    nonarch_base_libdir = d.getVar("base_libdir")
     qa_already_stripped = 'already-stripped' in (d.getVar('INSANE_SKIP:' + pn) or "").split()
     strip_cmd = d.getVar("STRIP")
 
-    oe.package.strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, d,
+    oe.package.strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, nonarch_base_libdir, d,
                            qa_already_stripped=qa_already_stripped)
 }
 

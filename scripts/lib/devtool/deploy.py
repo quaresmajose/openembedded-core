@@ -174,7 +174,7 @@ def deploy(args, config, basepath, workspace):
             exec_fakeroot(rd, "cp -af %s %s" % (os.path.join(srcdir, '.'), recipe_outdir), shell=True)
             os.environ['PATH'] = ':'.join([os.environ['PATH'], rd.getVar('PATH') or ''])
             oe.package.strip_execs(args.recipename, recipe_outdir, rd.getVar('STRIP'), rd.getVar('libdir'),
-                        rd.getVar('base_libdir'), rd)
+                        rd.getVar('base_libdir'), rd.getVar('nonarch_base_libdir'), rd)
 
         filelist = []
         inodes = set({})

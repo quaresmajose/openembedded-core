@@ -382,10 +382,10 @@ def splitdebuginfo(file, dvar, dv, d):
     debugfile = dvar + dest
     sources = []
 
-    if file.endswith(".ko") and file.find("/lib/modules/") != -1:
-        if oe.package.is_kernel_module_signed(file):
-            bb.debug(1, "Skip strip on signed module %s" % file)
-            return (file, sources)
+    kmodpath = d.expand('${nonarch_base_libdir}') + '/modules/'
+    if oe.package.is_kernel_module(file, kmodpath) and oe.package.is_kernel_module_signed(file):
+        bb.debug(1, "Skip strip on signed module %s" % file)
+        return (file, sources)
 
     # Split the file...
     bb.utils.mkdirhier(os.path.dirname(debugfile))
