@@ -57,11 +57,8 @@ def runstrip(arg):
     if newmode:
         os.chmod(file, origmode)
 
-def is_kernel_module(path, kmodpath):
-    return path.endswith(".ko") and path.startswith(kmodpath) and has_vermagic(path)
-
 # Detect .ko module by searching for "vermagic=" string
-def has_vermagic(path):
+def is_kernel_module(path):
     with open(path) as f:
         return mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ).find(b"vermagic=") >= 0
 
@@ -79,8 +76,7 @@ def is_kernel_module_signed(path):
 # 4 - executable
 # 8 - shared library
 # 16 - kernel module
-def is_elf(args):
-    path, kmodpath = args
+def is_elf(path):
     exec_type = 0
     result = subprocess.check_output(["file", "-b", path], stderr=subprocess.STDOUT).decode("utf-8")
 
@@ -93,7 +89,7 @@ def is_elf(args):
         if "shared" in result:
             exec_type |= 8
         if "relocatable" in result:
-            if is_kernel_module(path, kmodpath):
+            if path.endswith(".ko") and path.find("/lib/modules/") != -1 and is_kernel_module(path):
                 exec_type |= 16
     return (path, exec_type)
 
@@ -107,7 +103,7 @@ def is_static_lib(path):
             return start == magic
     return False
 
-def strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, nonarch_base_libdir, d, qa_already_stripped=False):
+def strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, d, qa_already_stripped=False):
     """
     Strip executable code (like executables, shared libraries) _in_place_
     - Based on sysroot_strip in staging.bbclass
@@ -115,7 +111,6 @@ def strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, nonarch_base_libdir,
     :param strip_cmd: Strip command (usually ${STRIP})
     :param libdir: ${libdir} - strip .so files in this directory
     :param base_libdir: ${base_libdir} - strip .so files in this directory
-    :param nonarch_base_libdir: ${nonarch_base_libdir} - used to get the kernel modules path
     :param qa_already_stripped: Set to True if already-stripped' in ${INSANE_SKIP}
     This is for proper logging and messages only.
     """
@@ -158,9 +153,9 @@ def strip_execs(pn, dstdir, strip_cmd, libdir, base_libdir, nonarch_base_libdir,
                 # ...but is it ELF, and is it already stripped?
                 checkelf.append(file)
                 inodecache[file] = s.st_ino
-    kmodpath = nonarch_base_libdir + '/modules/'
-    results = oe.utils.multiprocess_launch(is_elf, checkelf, d, extraargs=(kmodpath,))
+    results = oe.utils.multiprocess_launch(is_elf, checkelf, d)
     for (file, elf_file) in results:
+                #elf_file = is_elf(file)
                 if elf_file & 1:
                     if elf_file & 2:
                         if qa_already_stripped:
