@@ -623,7 +623,9 @@ do_shared_workdir () {
 }
 
 # We don't need to stage anything, not the modules/firmware since those would clash with linux-firmware
-SYSROOT_DIRS = ""
+sysroot_stage_all () {
+	:
+}
 
 KERNEL_CONFIG_COMMAND ?= "oe_runmake_call -C ${S} O=${B} olddefconfig || oe_runmake -C ${S} O=${B} oldnoconfig"
 
