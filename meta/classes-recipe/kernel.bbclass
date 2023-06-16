@@ -143,7 +143,6 @@ set -e
             d.appendVarFlag('do_bundle_initramfs', 'mcdepends', ' mc::${INITRAMFS_MULTICONFIG}:${INITRAMFS_IMAGE}:do_image_complete')
         else:
             d.appendVarFlag('do_bundle_initramfs', 'depends', ' ${INITRAMFS_IMAGE}:do_image_complete')
-        bb.build.addtask('do_transform_bundled_initramfs', 'do_deploy', 'do_bundle_initramfs', d)
     else:
         d.setVarFlag('do_bundle_initramfs', 'noexec', '1')
 }
@@ -314,16 +313,13 @@ do_bundle_initramfs () {
 			mv -f ${KERNEL_OUTPUT_DIR}/$imageType.bak ${KERNEL_OUTPUT_DIR}/$imageType
 		fi
 	done
-}
-do_bundle_initramfs[dirs] = "${B}"
 
-kernel_do_transform_bundled_initramfs() {
-        # vmlinux.gz is not built by kernel
+	# vmlinux.gz is not built by kernel
 	if (echo "${KERNEL_IMAGETYPES}" | grep -wq "vmlinux\.gz"); then
 		gzip -9cn < ${KERNEL_OUTPUT_DIR}/vmlinux.initramfs > ${KERNEL_OUTPUT_DIR}/vmlinux.gz.initramfs
-        fi
+	fi
 }
-do_transform_bundled_initramfs[dirs] = "${B}"
+do_bundle_initramfs[dirs] = "${B}"
 
 python do_package:prepend () {
     os.environ['STRIP'] = d.getVar('KERNEL_STRIP')
@@ -678,7 +674,7 @@ inherit cml1 pkgconfig
 # Need LD, HOSTLDFLAGS and more for config operations
 KCONFIG_CONFIG_COMMAND:append = " ${EXTRA_OEMAKE}"
 
-EXPORT_FUNCTIONS do_compile do_transform_kernel do_transform_bundled_initramfs do_install do_configure
+EXPORT_FUNCTIONS do_compile do_transform_kernel do_install do_configure
 
 # kernel-base becomes kernel-${KERNEL_VERSION}
 # kernel-image becomes kernel-image-${KERNEL_VERSION}
