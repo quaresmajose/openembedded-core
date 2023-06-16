@@ -28,7 +28,6 @@ INHIBIT_DEFAULT_DEPS = "1"
 KERNEL_IMAGETYPE ?= "zImage"
 INITRAMFS_IMAGE ?= ""
 INITRAMFS_IMAGE_NAME ?= "${@['${INITRAMFS_IMAGE}-${MACHINE}', ''][d.getVar('INITRAMFS_IMAGE') == '']}"
-INITRAMFS_TASK ?= ""
 INITRAMFS_IMAGE_BUNDLE ?= ""
 INITRAMFS_DEPLOY_DIR_IMAGE ?= "${DEPLOY_DIR_IMAGE}"
 INITRAMFS_MULTICONFIG ?= ""
@@ -141,14 +140,6 @@ set -e
             d.appendVarFlag('do_bundle_initramfs', 'depends', ' ${INITRAMFS_IMAGE}:do_image_complete')
     else:
         d.setVarFlag('do_bundle_initramfs', 'noexec', '1')
-
-    # NOTE: setting INITRAMFS_TASK is for backward compatibility
-    #       The preferred method is to set INITRAMFS_IMAGE, because
-    #       this INITRAMFS_TASK has circular dependency problems
-    #       if the initramfs requires kernel modules
-    image_task = d.getVar('INITRAMFS_TASK')
-    if image_task:
-        d.appendVarFlag('do_configure', 'depends', ' ${INITRAMFS_TASK}')
 }
 
 # Here we pull in all various kernel image types which we support.
@@ -368,12 +359,6 @@ kernel_do_compile() {
 	# different initramfs image.  The way to do that in the kernel
 	# is to specify:
 	# make ...args... CONFIG_INITRAMFS_SOURCE=some_other_initramfs.cpio
-	if [ "$use_alternate_initrd" = "" ] && [ "${INITRAMFS_TASK}" != "" ] ; then
-		# The old style way of copying an prebuilt image and building it
-		# is turned on via INTIRAMFS_TASK != ""
-		copy_initramfs
-		use_alternate_initrd=CONFIG_INITRAMFS_SOURCE=${B}/usr/${INITRAMFS_IMAGE_NAME}.cpio
-	fi
 	for typeformake in ${KERNEL_IMAGETYPE_FOR_MAKE} ; do
 		oe_runmake ${PARALLEL_MAKE} ${typeformake} ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 	done
