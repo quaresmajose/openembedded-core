@@ -26,7 +26,6 @@ DEPENDS += "elfutils-native"
 # libraries that are only present in the recipe native sysroot
 EXTRA_OEMAKE = " HOSTCC="${BUILD_CC} ${BUILD_CFLAGS} ${BUILD_LDFLAGS} -static" HOSTCPP="${BUILD_CPP}""
 EXTRA_OEMAKE += " HOSTCXX="${BUILD_CXX} ${BUILD_CXXFLAGS} ${BUILD_LDFLAGS} -static" CROSS_COMPILE=${TARGET_PREFIX}"
-EXTRA_OEMAKE += "V=1"
 
 # Build some host tools under work-shared.  CC, LD, and AR are probably
 # not used, but this is the historical way of invoking "make scripts".
@@ -41,14 +40,9 @@ do_configure() {
 	export PKG_CONFIG_SYSROOT_DIR=""
 
 	# for pre-5.15 kernels
-	LIBELF_LIBS=$(pkg-config --static libelf --libs 2>/dev/null || echo -lelf)
-	export LIBELF_LIBS="$LIBELF_LIBS -lz"
+	LIBELF_LIBS=$(pkg-config libelf --libs 2>/dev/null || echo -lelf)
+	export LIBELF_LIBS="$HOST_LIBELF_LIBS -lz"
 	export HOSTLDFLAGS="-lz"
-
-	HOSTPKG_CONFIG="pkg-config --static"
-	# override CRYPTO_LIBS since HOSTPKG_CONFIG lands only in v5.19-rc1
-	# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d5ea4fece4508bf8e72b659cd22fa4840d8d61e5
-	CRYPTO_LIBS="$(pkg-config --static --libs libcrypto 2>/dev/null || echo -lcrypto)"
 
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 	for t in prepare scripts_basic scripts; do
@@ -56,7 +50,6 @@ do_configure() {
 		AR="${KERNEL_AR}" OBJCOPY="${KERNEL_OBJCOPY}" \
 		STRIP="${KERNEL_STRIP}" \
 		HOSTPKG_CONFIG="pkg-config --static" \
-		HOSTPKG_CONFIG="${HOSTPKG_CONFIG}" CRYPTO_LIBS="${CRYPTO_LIBS}" \
 		-C ${STAGING_KERNEL_DIR} O=${STAGING_KERNEL_BUILDDIR} $t
 	done
 }
