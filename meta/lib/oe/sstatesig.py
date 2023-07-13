@@ -506,7 +506,7 @@ def OEOuthashBasic(path, sigfile, task, d):
     corebase = d.getVar("COREBASE")
     tmpdir = d.getVar("TMPDIR")
     include_owners = os.environ.get('PSEUDO_DISABLED') == '0'
-    if "package_write_" in task or task == "package_qa":
+    if "package_write_" in task or task == "package_qa" or task == "image_complete":
         include_owners = False
     include_timestamps = False
     include_root = True
