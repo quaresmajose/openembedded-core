@@ -318,9 +318,7 @@ EOF
 			${SPL_MKIMAGE_SIGN_ARGS}
 	fi
 
-	if [ -e "${SPL_DIR}/${SPL_DTB_BINARY}" ]; then
-		cp ${SPL_DIR}/${SPL_DTB_BINARY} ${SPL_DIR}/${SPL_DTB_SIGNED}
-	fi
+	cp ${SPL_DIR}/${SPL_DTB_BINARY} ${SPL_DIR}/${SPL_DTB_SIGNED}
 }
 
 uboot_assemble_fitimage_helper() {
