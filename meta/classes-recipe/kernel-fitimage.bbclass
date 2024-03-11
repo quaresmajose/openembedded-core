@@ -421,7 +421,6 @@ fitimage_emit_section_config() {
 	bootscr_line=""
 	setup_line=""
 	default_line=""
-	compatible_line=""
 
 	dtb_image_sect=$(symlink_points_below $dtb_image "${EXTERNAL_KERNEL_DEVICETREE}")
 	if [ -z "$dtb_image_sect" ]; then
@@ -429,12 +428,7 @@ fitimage_emit_section_config() {
 	fi
 
 	dtb_path="${EXTERNAL_KERNEL_DEVICETREE}/${dtb_image_sect}"
-	if [ -e "$dtb_path" ]; then
-		compat=$(fdtget -t s "$dtb_path" / compatible | sed 's/ /", "/g')
-		if [ -n "$compat" ]; then
-			compatible_line="compatible = \"$compat\";"
-		fi
-	fi
+	compatible_line="compatible = \"$(fdtget "$dtb_path" / compatible | sed 's/ /", "/g')\";"
 
 	dtb_image=$(echo $dtb_image | tr '/' '_')
 	dtb_image_sect=$(echo "${dtb_image_sect}" | tr '/' '_')
